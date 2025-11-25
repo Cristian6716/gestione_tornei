@@ -11,10 +11,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #e2e8f0; }
-        .bracket-scroll { -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #4b5563 #1e293b; }
-        .bracket-scroll::-webkit-scrollbar { height: 8px; }
-        .bracket-scroll::-webkit-scrollbar-track { background: #1e293b; }
-        .bracket-scroll::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 20px; }
+        /* Modificato: scrollbar sempre visibile e stilizzata meglio */
+        .bracket-scroll { 
+            -webkit-overflow-scrolling: touch; 
+            scrollbar-width: thin; 
+            scrollbar-color: #60a5fa #1e293b; 
+        }
+        .bracket-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
+        .bracket-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .bracket-scroll::-webkit-scrollbar-thumb { background-color: #3b82f6; border-radius: 5px; border: 2px solid #0f172a; }
+        .bracket-scroll::-webkit-scrollbar-thumb:hover { background-color: #60a5fa; }
+        
         .match-card-bg { background: linear-gradient(145deg, #1e293b, #334155); }
         .eliminated-team { text-decoration: line-through; opacity: 0.5; }
     </style>
@@ -237,9 +244,9 @@
                     </header>
 
                     {/* Contenuto */}
-                    <main className="p-4 sm:p-6">
+                    <main className="p-4 sm:p-6 h-full flex flex-col flex-1 overflow-hidden">
                         {view === 'schedule' ? (
-                            <div className="space-y-8">
+                            <div className="space-y-8 pb-10">
                                 {sortedDays.map(day => (
                                     <div key={day} className="animate-fade-in">
                                         <div className="flex items-center gap-3 mb-4">
@@ -258,25 +265,32 @@
                                 ))}
                             </div>
                         ) : (
-                            <div className="overflow-x-auto bracket-scroll pb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
-                                <div className="flex gap-6 min-w-max p-2">
-                                    {/* Visualizzazione Colonne per il Tabellone */}
-                                    {sortedDays.map(day => (
-                                        <div key={day} className="flex flex-col gap-4 w-72">
-                                            <div className="text-center font-bold text-gray-500 text-sm mb-2 border-b-2 border-slate-700 pb-2 flex items-center justify-center gap-2">
-                                                G{day}
+                            <div className="relative border border-slate-700/50 rounded-xl bg-slate-900/30 shadow-inner overflow-hidden">
+                                {/* Indicatore visivo per scrollare */}
+                                <div className="absolute top-2 right-4 text-xs text-blue-400/50 pointer-events-none animate-pulse z-20 hidden md:block">
+                                    <i className="fas fa-arrows-alt-h mr-1"></i> Scorri il tabellone
+                                </div>
+                                
+                                <div className="overflow-auto bracket-scroll h-[calc(100vh-180px)] w-full p-4">
+                                    <div className="flex gap-6 min-w-max pb-4">
+                                        {/* Visualizzazione Colonne per il Tabellone */}
+                                        {sortedDays.map(day => (
+                                            <div key={day} className="flex flex-col gap-4 w-72">
+                                                <div className="sticky top-0 z-10 bg-slate-800/90 backdrop-blur text-center font-bold text-gray-300 text-sm mb-2 border-b border-blue-500/30 py-2 rounded shadow-lg flex items-center justify-center gap-2">
+                                                    G{day}
+                                                </div>
+                                                {matchesByDay[day].map(match => (
+                                                    <MatchCard key={match.id} match={match} />
+                                                ))}
                                             </div>
-                                            {matchesByDay[day].map(match => (
-                                                <MatchCard key={match.id} match={match} />
-                                            ))}
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
                     </main>
                     
-                    <footer className="text-center text-gray-500 text-xs p-6 mt-8 border-t border-slate-800 bg-slate-900/50">
+                    <footer className="text-center text-gray-500 text-xs p-4 border-t border-slate-800 bg-slate-900/50 fixed bottom-0 w-full z-50 backdrop-blur-sm hidden md:block">
                         <p className="flex items-center justify-center gap-2 mb-2">
                             <i className="fas fa-code text-blue-500"></i> Fantacalcio Tournament Bracket
                         </p>
