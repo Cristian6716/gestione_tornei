@@ -10,10 +10,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0fdf4; }
-        .bracket-scroll { -webkit-overflow-scrolling: touch; }
-        .match-card { transition: all 0.2s; }
-        .match-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        .bracket-scroll { -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #4b5563 #1e293b; }
+        .bracket-scroll::-webkit-scrollbar { height: 8px; }
+        .bracket-scroll::-webkit-scrollbar-track { background: #1e293b; }
+        .bracket-scroll::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 20px; }
+        .match-card-bg { background: linear-gradient(145deg, #1e293b, #334155); }
+        .eliminated-team { text-decoration: line-through; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -25,70 +28,71 @@
         // ==========================================
         // Per aggiornare i risultati, modifica i campi 'scoreA', 'scoreB' e 'winner'.
         // 'winner': null (non giocata), 'A' (ha vinto squadra A), 'B' (ha vinto squadra B)
+        // 'eliminated': null, 'A', 'B', o 'both'. Chi perde in un match ad eliminazione diretta va qui.
         
         const initialData = {
             matches: [
                 // --- GIORNATA 24 ---
-                { id: 'M1', day: 24, bracket: 'upper', teamA: 'Squadra A1', teamB: 'Squadra B1', scoreA: null, scoreB: null, winner: null },
-                { id: 'M2', day: 24, bracket: 'upper', teamA: 'Squadra C1', teamB: 'Squadra D1', scoreA: null, scoreB: null, winner: null },
-                { id: 'M6', day: 24, bracket: 'mid', teamA: 'Squadra A2', teamB: 'Squadra B3', scoreA: null, scoreB: null, winner: null },
-                { id: 'M7', day: 24, bracket: 'mid', teamA: 'Squadra B2', teamB: 'Squadra A3', scoreA: null, scoreB: null, winner: null },
-                { id: 'M8', day: 24, bracket: 'mid', teamA: 'Squadra C2', teamB: 'Squadra D3', scoreA: null, scoreB: null, winner: null },
-                { id: 'M9', day: 24, bracket: 'mid', teamA: 'Squadra D2', teamB: 'Squadra C3', scoreA: null, scoreB: null, winner: null },
-                { id: 'M4', day: 24, bracket: 'lower', teamA: 'Squadra A4', teamB: 'Squadra B4', scoreA: null, scoreB: null, winner: null },
-                { id: 'M5', day: 24, bracket: 'lower', teamA: 'Squadra C4', teamB: 'Squadra D4', scoreA: null, scoreB: null, winner: null },
+                { id: 'M1', day: 24, bracket: 'upper', teamA: 'Squadra A1', teamB: 'Squadra B1', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M2', day: 24, bracket: 'upper', teamA: 'Squadra C1', teamB: 'Squadra D1', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M6', day: 24, bracket: 'mid', teamA: 'Squadra A2', teamB: 'Squadra B3', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M7', day: 24, bracket: 'mid', teamA: 'Squadra B2', teamB: 'Squadra A3', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M8', day: 24, bracket: 'mid', teamA: 'Squadra C2', teamB: 'Squadra D3', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M9', day: 24, bracket: 'mid', teamA: 'Squadra D2', teamB: 'Squadra C3', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M4', day: 24, bracket: 'lower', teamA: 'Squadra A4', teamB: 'Squadra B4', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M5', day: 24, bracket: 'lower', teamA: 'Squadra C4', teamB: 'Squadra D4', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 25 ---
-                { id: 'M10', day: 25, bracket: 'mid', teamA: 'Vinc. M6', teamB: 'Vinc. M7', scoreA: null, scoreB: null, winner: null },
-                { id: 'M11', day: 25, bracket: 'mid', teamA: 'Vinc. M8', teamB: 'Vinc. M9', scoreA: null, scoreB: null, winner: null },
-                { id: 'M16', day: 25, bracket: 'mid', teamA: 'Perd. M6', teamB: 'Perd. M7', scoreA: null, scoreB: null, winner: null },
-                { id: 'M17', day: 25, bracket: 'mid', teamA: 'Perd. M8', teamB: 'Perd. M9', scoreA: null, scoreB: null, winner: null },
+                { id: 'M10', day: 25, bracket: 'mid', teamA: 'Vinc. M6', teamB: 'Vinc. M7', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M11', day: 25, bracket: 'mid', teamA: 'Vinc. M8', teamB: 'Vinc. M9', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M16', day: 25, bracket: 'mid', teamA: 'Perd. M6', teamB: 'Perd. M7', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M17', day: 25, bracket: 'mid', teamA: 'Perd. M8', teamB: 'Perd. M9', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 26 ---
-                { id: 'M3', day: 26, bracket: 'upper', teamA: 'Vinc. M1', teamB: 'Vinc. M2', scoreA: null, scoreB: null, winner: null },
-                { id: 'M12', day: 26, bracket: 'mid', teamA: 'Vinc. M10', teamB: 'Perd. M1', scoreA: null, scoreB: null, winner: null },
-                { id: 'M13', day: 26, bracket: 'mid', teamA: 'Vinc. M11', teamB: 'Perd. M2', scoreA: null, scoreB: null, winner: null },
-                { id: 'M18', day: 26, bracket: 'lower', teamA: 'Perd. M10', teamB: 'Vinc. M16', scoreA: null, scoreB: null, winner: null },
-                { id: 'M19', day: 26, bracket: 'lower', teamA: 'Perd. M11', teamB: 'Vinc. M17', scoreA: null, scoreB: null, winner: null },
-                { id: 'M20', day: 26, bracket: 'lower', teamA: 'Vinc. M4', teamB: 'Perd. M16', scoreA: null, scoreB: null, winner: null },
-                { id: 'M21', day: 26, bracket: 'lower', teamA: 'Vinc. M5', teamB: 'Perd. M17', scoreA: null, scoreB: null, winner: null },
+                { id: 'M3', day: 26, bracket: 'upper', teamA: 'Vinc. M1', teamB: 'Vinc. M2', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M12', day: 26, bracket: 'mid', teamA: 'Vinc. M10', teamB: 'Perd. M1', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M13', day: 26, bracket: 'mid', teamA: 'Vinc. M11', teamB: 'Perd. M2', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M18', day: 26, bracket: 'lower', teamA: 'Perd. M10', teamB: 'Vinc. M16', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M19', day: 26, bracket: 'lower', teamA: 'Perd. M11', teamB: 'Vinc. M17', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M20', day: 26, bracket: 'lower', teamA: 'Vinc. M4', teamB: 'Perd. M16', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M21', day: 26, bracket: 'lower', teamA: 'Vinc. M5', teamB: 'Perd. M17', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 27 ---
-                { id: 'M14', day: 27, bracket: 'mid', teamA: 'Vinc. M12', teamB: 'Vinc. M13', scoreA: null, scoreB: null, winner: null },
-                { id: 'M22', day: 27, bracket: 'lower', teamA: 'Vinc. M18', teamB: 'Perd. M12', scoreA: null, scoreB: null, winner: null },
-                { id: 'M23', day: 27, bracket: 'lower', teamA: 'Vinc. M19', teamB: 'Perd. M13', scoreA: null, scoreB: null, winner: null },
-                { id: 'M24', day: 27, bracket: 'lower', teamA: 'Vinc. M20', teamB: 'Perd. M18', scoreA: null, scoreB: null, winner: null },
-                { id: 'M25', day: 27, bracket: 'lower', teamA: 'Vinc. M21', teamB: 'Perd. M19', scoreA: null, scoreB: null, winner: null },
+                { id: 'M14', day: 27, bracket: 'mid', teamA: 'Vinc. M12', teamB: 'Vinc. M13', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M22', day: 27, bracket: 'lower', teamA: 'Vinc. M18', teamB: 'Perd. M12', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M23', day: 27, bracket: 'lower', teamA: 'Vinc. M19', teamB: 'Perd. M13', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M24', day: 27, bracket: 'lower', teamA: 'Vinc. M20', teamB: 'Perd. M18', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M25', day: 27, bracket: 'lower', teamA: 'Vinc. M21', teamB: 'Perd. M19', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 28 ---
-                { id: 'M15', day: 28, bracket: 'mid', teamA: 'Vinc. M14', teamB: 'Perd. M3', scoreA: null, scoreB: null, winner: null },
-                { id: 'M26', day: 28, bracket: 'lower', teamA: 'Vinc. M22', teamB: 'Vinc. M23', scoreA: null, scoreB: null, winner: null },
-                { id: 'M27', day: 28, bracket: 'lower', teamA: 'Vinc. M24', teamB: 'Perd. M22', scoreA: null, scoreB: null, winner: null },
-                { id: 'M28', day: 28, bracket: 'lower', teamA: 'Vinc. M25', teamB: 'Perd. M23', scoreA: null, scoreB: null, winner: null },
+                { id: 'M15', day: 28, bracket: 'mid', teamA: 'Vinc. M14', teamB: 'Perd. M3', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M26', day: 28, bracket: 'lower', teamA: 'Vinc. M22', teamB: 'Vinc. M23', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M27', day: 28, bracket: 'lower', teamA: 'Vinc. M24', teamB: 'Perd. M22', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M28', day: 28, bracket: 'lower', teamA: 'Vinc. M25', teamB: 'Perd. M23', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 29 ---
-                { id: 'M30', day: 29, bracket: 'lower', teamA: 'Vinc. M26', teamB: 'Perd. M14', scoreA: null, scoreB: null, winner: null },
-                { id: 'M29', day: 29, bracket: 'lower', teamA: 'Vinc. M27', teamB: 'Vinc. M28', scoreA: null, scoreB: null, winner: null },
+                { id: 'M30', day: 29, bracket: 'lower', teamA: 'Vinc. M26', teamB: 'Perd. M14', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
+                { id: 'M29', day: 29, bracket: 'lower', teamA: 'Vinc. M27', teamB: 'Vinc. M28', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 30 ---
-                { id: 'M31', day: 30, bracket: 'lower', teamA: 'Vinc. M30', teamB: 'Perd. M15', scoreA: null, scoreB: null, winner: null },
-                { id: 'M32', day: 30, bracket: 'lower', teamA: 'Vinc. M29', teamB: 'Perd. M26', scoreA: null, scoreB: null, winner: null },
+                { id: 'M31', day: 30, bracket: 'lower', teamA: 'Vinc. M30', teamB: 'Perd. M15', scoreA: null, scoreB: null, winner: null, eliminated: null },
+                { id: 'M32', day: 30, bracket: 'lower', teamA: 'Vinc. M29', teamB: 'Perd. M26', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 31 ---
-                { id: 'M33', day: 31, bracket: 'lower', teamA: 'Vinc. M32', teamB: 'Perd. M30', scoreA: null, scoreB: null, winner: null },
+                { id: 'M33', day: 31, bracket: 'lower', teamA: 'Vinc. M32', teamB: 'Perd. M30', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 32 ---
-                { id: 'M34', day: 32, bracket: 'lower', teamA: 'Vinc. M33', teamB: 'Perd. M31', scoreA: null, scoreB: null, winner: null },
+                { id: 'M34', day: 32, bracket: 'lower', teamA: 'Vinc. M33', teamB: 'Perd. M31', scoreA: null, scoreB: null, winner: null, eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 34 (QUARTI) ---
-                { id: 'M35', day: 34, bracket: 'finals', teamA: 'Vinc. M3', teamB: 'Vinc. M15', scoreA: null, scoreB: null, winner: null, label: 'Upper Final' },
-                { id: 'M36', day: 34, bracket: 'finals', teamA: 'Vinc. M31', teamB: 'Vinc. M34', scoreA: null, scoreB: null, winner: null, label: 'Lower Final' },
+                { id: 'M35', day: 34, bracket: 'finals', teamA: 'Vinc. M3', teamB: 'Vinc. M15', scoreA: null, scoreB: null, winner: null, label: 'Upper Final', eliminated: null },
+                { id: 'M36', day: 34, bracket: 'finals', teamA: 'Vinc. M31', teamB: 'Vinc. M34', scoreA: null, scoreB: null, winner: null, label: 'Lower Final', eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 36 (SEMIFINALE) ---
-                { id: 'M37', day: 36, bracket: 'finals', teamA: 'Perd. M35', teamB: 'Vinc. M36', scoreA: null, scoreB: null, winner: null, label: 'Semifinale' },
+                { id: 'M37', day: 36, bracket: 'finals', teamA: 'Perd. M35', teamB: 'Vinc. M36', scoreA: null, scoreB: null, winner: null, label: 'Semifinale', eliminated: null }, // Perdente eliminato
 
                 // --- GIORNATA 38 (FINALE) ---
-                { id: 'Final', day: 38, bracket: 'finals', teamA: 'Vinc. M35', teamB: 'Vinc. M37', scoreA: null, scoreB: null, winner: null, label: 'FINALISSIMA' },
+                { id: 'Final', day: 38, bracket: 'finals', teamA: 'Vinc. M35', teamB: 'Vinc. M37', scoreA: null, scoreB: null, winner: null, label: 'FINALISSIMA', eliminated: null }, // Perdente eliminato (secondo classificato)
             ]
         };
 
@@ -96,46 +100,92 @@
         // ⚛️ APPLICAZIONE REACT
         // ==========================================
 
-        const MatchCard = ({ match }) => {
-            const isPlayed = match.winner !== null;
-            
-            // Colori in base al bracket
-            let bracketColor = "border-gray-300 bg-white";
-            let badgeColor = "bg-gray-100 text-gray-600";
-            
-            if (match.bracket === 'upper') {
-                bracketColor = "border-green-200 bg-green-50";
-                badgeColor = "bg-green-200 text-green-800";
-            } else if (match.bracket === 'mid') {
-                bracketColor = "border-yellow-200 bg-yellow-50";
-                badgeColor = "bg-yellow-200 text-yellow-800";
-            } else if (match.bracket === 'lower') {
-                bracketColor = "border-red-200 bg-red-50";
-                badgeColor = "bg-red-200 text-red-800";
-            } else if (match.bracket === 'finals') {
-                bracketColor = "border-purple-200 bg-purple-50 shadow-md";
-                badgeColor = "bg-purple-200 text-purple-800";
+        const TeamRow = ({ teamName, score, isWinner, isEliminated, bracketType }) => {
+            let statusIcon = null;
+            let statusClass = "";
+
+            if (isWinner) {
+                statusIcon = <i className="fas fa-check-circle text-green-400 ml-2"></i>;
+                statusClass = "font-bold text-green-300";
+            } else if (isEliminated) {
+                statusIcon = <i className="fas fa-times-circle text-red-500 ml-2" title="Eliminato"></i>;
+                statusClass = "eliminated-team text-red-400";
+            } else if (score === null) {
+                statusClass = "text-gray-400";
             }
 
+            let teamIconColor = "text-blue-400";
+            if (bracketType === 'upper') teamIconColor = "text-emerald-400";
+            if (bracketType === 'mid') teamIconColor = "text-amber-400";
+            if (bracketType === 'lower') teamIconColor = "text-rose-400";
+            if (bracketType === 'finals') teamIconColor = "text-purple-400";
+
             return (
-                <div className={`p-3 rounded-lg border-2 ${bracketColor} match-card flex flex-col gap-2 min-w-[200px]`}>
-                    <div className="flex justify-between items-center text-xs">
-                        <span className={`px-2 py-0.5 rounded-full font-bold ${badgeColor}`}>{match.id}</span>
-                        <span className="text-gray-500 font-semibold">G{match.day}</span>
+                <div className={`flex justify-between items-center p-2 rounded-md ${isWinner ? 'bg-green-900/30' : (isEliminated ? 'bg-red-900/20' : '')} ${statusClass}`}>
+                    <div className="flex items-center gap-2 truncate">
+                        <i className={`fas fa-shield-alt ${teamIconColor}`}></i>
+                        <span className="truncate text-sm">{teamName}</span>
+                        {statusIcon}
                     </div>
-                    {match.label && <div className="text-center text-xs font-bold text-purple-700 uppercase">{match.label}</div>}
+                    <span className={`font-mono text-lg ${score !== null ? 'font-bold' : 'text-gray-600'}`}>
+                        {score !== null ? score : '-'}
+                    </span>
+                </div>
+            );
+        };
+
+        const MatchCard = ({ match }) => {
+            // Colori in base al bracket
+            let bracketBorder = "border-blue-500/50";
+            let bracketBadge = "bg-blue-500/20 text-blue-300";
+            
+            if (match.bracket === 'upper') {
+                bracketBorder = "border-emerald-500/50";
+                bracketBadge = "bg-emerald-500/20 text-emerald-300";
+            } else if (match.bracket === 'mid') {
+                bracketBorder = "border-amber-500/50";
+                bracketBadge = "bg-amber-500/20 text-amber-300";
+            } else if (match.bracket === 'lower') {
+                bracketBorder = "border-rose-500/50";
+                bracketBadge = "bg-rose-500/20 text-rose-300";
+            } else if (match.bracket === 'finals') {
+                bracketBorder = "border-purple-500/50 shadow-purple-500/20 shadow-md";
+                bracketBadge = "bg-purple-500/20 text-purple-300";
+            }
+
+            const isEliminatedA = match.eliminated === 'A' || match.eliminated === 'both';
+            const isEliminatedB = match.eliminated === 'B' || match.eliminated === 'both';
+
+            return (
+                <div className={`p-3 rounded-xl border ${bracketBorder} match-card-bg flex flex-col gap-3 min-w-[220px] relative overflow-hidden`}>
+                    {/* Sfondo decorativo */}
+                    <div className="absolute top-0 right-0 -mt-4 -mr-4 opacity-10 text-6xl">
+                        <i className="fas fa-futbol"></i>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs relative z-10">
+                        <span className={`px-2.5 py-1 rounded-full font-bold ${bracketBadge}`}>{match.id}</span>
+                        <span className="text-gray-400 font-semibold flex items-center gap-1"><i className="far fa-calendar"></i> G{match.day}</span>
+                    </div>
+                    {match.label && <div className="text-center text-xs font-bold text-purple-300 uppercase tracking-wider relative z-10">{match.label}</div>}
                     
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-2 relative z-10">
                         {/* Squadra A */}
-                        <div className={`flex justify-between items-center p-1 rounded ${match.winner === 'A' ? 'bg-green-200 font-bold' : (match.winner === 'B' ? 'opacity-50' : '')}`}>
-                            <span className="truncate text-sm">{match.teamA}</span>
-                            <span className="font-mono font-bold">{match.scoreA !== null ? match.scoreA : '-'}</span>
-                        </div>
+                        <TeamRow 
+                            teamName={match.teamA} 
+                            score={match.scoreA} 
+                            isWinner={match.winner === 'A'} 
+                            isEliminated={isEliminatedA}
+                            bracketType={match.bracket}
+                        />
                         {/* Squadra B */}
-                        <div className={`flex justify-between items-center p-1 rounded ${match.winner === 'B' ? 'bg-green-200 font-bold' : (match.winner === 'A' ? 'opacity-50' : '')}`}>
-                            <span className="truncate text-sm">{match.teamB}</span>
-                            <span className="font-mono font-bold">{match.scoreB !== null ? match.scoreB : '-'}</span>
-                        </div>
+                        <TeamRow 
+                            teamName={match.teamB} 
+                            score={match.scoreB} 
+                            isWinner={match.winner === 'B'} 
+                            isEliminated={isEliminatedB}
+                            bracketType={match.bracket}
+                        />
                     </div>
                 </div>
             );
@@ -156,49 +206,50 @@
             const sortedDays = Object.keys(matchesByDay).sort((a, b) => a - b);
 
             return (
-                <div className="max-w-4xl mx-auto min-h-screen pb-10">
+                <div className="max-w-4xl mx-auto min-h-screen pb-14">
                     {/* Header */}
-                    <header className="bg-gradient-to-r from-emerald-600 to-green-500 text-white p-4 shadow-lg sticky top-0 z-10">
+                    <header className="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 p-4 sticky top-0 z-50">
                         <div className="flex justify-between items-center mb-4">
-                            <h1 className="text-2xl font-bold flex items-center gap-2">
-                                <i className="fas fa-trophy text-yellow-300"></i>
+                            <h1 className="text-2xl font-black flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                                <i className="fas fa-trophy text-yellow-400"></i>
                                 FantaTorneo
                             </h1>
-                            <div className="text-xs bg-white/20 px-2 py-1 rounded">
+                            <div className="text-xs bg-slate-700/50 px-3 py-1.5 rounded-full font-mono text-gray-300 border border-slate-600">
                                 G24 - G38
                             </div>
                         </div>
                         
                         {/* Navigazione */}
-                        <div className="flex gap-2 p-1 bg-black/10 rounded-lg">
+                        <div className="flex gap-2 p-1 bg-slate-900/50 rounded-xl border border-slate-700/50">
                             <button 
                                 onClick={() => setView('schedule')}
-                                className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${view === 'schedule' ? 'bg-white text-emerald-700 shadow' : 'text-white hover:bg-white/10'}`}
+                                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${view === 'schedule' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:bg-slate-800 hover:text-gray-200'}`}
                             >
-                                <i className="far fa-calendar-alt mr-2"></i> Calendario
+                                <i className="far fa-calendar-alt"></i> Calendario
                             </button>
                             <button 
                                 onClick={() => setView('bracket')}
-                                className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${view === 'bracket' ? 'bg-white text-emerald-700 shadow' : 'text-white hover:bg-white/10'}`}
+                                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${view === 'bracket' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:bg-slate-800 hover:text-gray-200'}`}
                             >
-                                <i className="fas fa-project-diagram mr-2"></i> Tabellone
+                                <i className="fas fa-sitemap"></i> Tabellone
                             </button>
                         </div>
                     </header>
 
                     {/* Contenuto */}
-                    <main className="p-4">
+                    <main className="p-4 sm:p-6">
                         {view === 'schedule' ? (
-                            <div className="space-y-6">
+                            <div className="space-y-8">
                                 {sortedDays.map(day => (
                                     <div key={day} className="animate-fade-in">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <span className="bg-emerald-100 text-emerald-800 text-sm font-bold px-3 py-1 rounded-full border border-emerald-200">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <span className="bg-slate-800 text-blue-400 text-sm font-bold px-4 py-1.5 rounded-full border border-slate-700 flex items-center gap-2">
+                                                <i className="far fa-clock"></i>
                                                 Giornata {day}
                                             </span>
-                                            {day == 33 || day == 35 || day == 37 ? <span className="text-xs text-gray-400 italic">(Pausa)</span> : null}
+                                            {day == 33 || day == 35 || day == 37 ? <span className="text-xs text-gray-500 italic flex items-center gap-1"><i className="fas fa-pause-circle"></i> Pausa</span> : null}
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {matchesByDay[day].map(match => (
                                                 <MatchCard key={match.id} match={match} />
                                             ))}
@@ -207,12 +258,12 @@
                                 ))}
                             </div>
                         ) : (
-                            <div className="overflow-x-auto bracket-scroll pb-6">
-                                <div className="flex gap-4 min-w-max p-2">
+                            <div className="overflow-x-auto bracket-scroll pb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
+                                <div className="flex gap-6 min-w-max p-2">
                                     {/* Visualizzazione Colonne per il Tabellone */}
                                     {sortedDays.map(day => (
-                                        <div key={day} className="flex flex-col gap-3 w-64">
-                                            <div className="text-center font-bold text-gray-400 text-sm mb-2 border-b-2 border-gray-200 pb-1">
+                                        <div key={day} className="flex flex-col gap-4 w-72">
+                                            <div className="text-center font-bold text-gray-500 text-sm mb-2 border-b-2 border-slate-700 pb-2 flex items-center justify-center gap-2">
                                                 G{day}
                                             </div>
                                             {matchesByDay[day].map(match => (
@@ -225,8 +276,11 @@
                         )}
                     </main>
                     
-                    <footer className="text-center text-gray-400 text-xs p-4 mt-8 border-t">
-                        Fantacalcio Tournament Bracket • Powered by React
+                    <footer className="text-center text-gray-500 text-xs p-6 mt-8 border-t border-slate-800 bg-slate-900/50">
+                        <p className="flex items-center justify-center gap-2 mb-2">
+                            <i className="fas fa-code text-blue-500"></i> Fantacalcio Tournament Bracket
+                        </p>
+                        <p className="opacity-60">Powered by React & Tailwind CSS</p>
                     </footer>
                 </div>
             );
