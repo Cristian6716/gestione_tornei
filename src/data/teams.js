@@ -1,0 +1,18 @@
+export const teams = [
+  'Energy Team',
+  'Fessa Kyoto FC',
+  'Rocks Pirates',
+  'Padre Tempo',
+  'Fredin Fc',
+  'SohMatta',
+  'Lang Olodelsesso',
+  'Come VaVA',
+  'Cani della Malesia',
+  'Napolethanos',
+  'Sesko e Sambia',
+  'One Pisa',
+  'Qarabaggio',
+  'Figli di Putin',
+  'Beautiful Abyssinian',
+  'Rubin Kebab',
+];

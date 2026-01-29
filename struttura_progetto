@@ -1,0 +1,25 @@
+fanta-tournament/
+├── src/
+│   ├── pages/
+│   │   ├── index.js           # Landing page (redirect a /pubblico)
+│   │   ├── admin.js           # Inserimento punteggi (protetta da password)
+│   │   └── pubblico.js        # Visualizzazione competizioni
+│   ├── components/
+│   │   ├── BattleRoyale/
+│   │   │   ├── Classifica.js      # Classifica completa
+│   │   │   ├── GrigliaScontri.js  # Matrice V/P/S
+│   │   │   └── Storico.js         # Risultati per giornata
+│   │   ├── Torneo/
+│   │   │   └── Bracket.js         # Tabellone torneo
+│   │   └── AdminPanel.js          # Form inserimento punteggi
+│   ├── utils/
+│   │   ├── battleRoyaleLogic.js   # Calcolo gol e punti
+│   │   ├── torneoLogic.js         # Gestione avanzamenti torneo
+│   │   └── storage.js             # Persistenza dati
+│   └── data/
+│       ├── teams.js               # 16 squadre
+│       └── tournamentMatches.js   # Struttura torneo
+├── styles/
+│   └── globals.css
+├── package.json
+└── vercel.json
