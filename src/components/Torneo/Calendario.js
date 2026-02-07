@@ -22,7 +22,7 @@ export default function Calendario({ matches }) {
   );
 
   // Giornate "pausa" (senza match)
-  const pauseDays = [33, 35, 37];
+  const pauseDays = [35, 37];
 
   return (
     <div className="space-y-8 pb-10">

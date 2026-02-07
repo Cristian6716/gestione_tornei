@@ -51,7 +51,7 @@ export default function PubblicoPage() {
               </h1>
               <div className="flex items-center gap-3">
                 <span className="text-xs bg-slate-700/50 px-3 py-1.5 rounded-full font-mono text-gray-300 border border-slate-600">
-                  G24 - G38
+                  G25 - G38
                 </span>
                 {giornateCount > 0 && (
                   <span className="text-xs bg-emerald-900/30 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/30">
@@ -190,7 +190,7 @@ export default function PubblicoPage() {
         <footer className="text-center text-gray-600 text-xs p-4 border-t border-slate-800 mt-8">
           <p className="flex items-center justify-center gap-2">
             <i className="fas fa-futbol text-blue-500/50"></i>
-            FantaTorneo G24-G38
+            FantaTorneo G25-G38
           </p>
         </footer>
       </div>
