@@ -31,13 +31,13 @@ export function calculateMatchResult(scoreA, scoreB) {
       golA = bandA;
       golB = bandB;
     } else {
-      // Chi ha il punteggio piu alto vince
+      // Chi ha il punteggio piu alto vince (ma non puo fare piu gol della propria fascia)
       if (scoreA > scoreB) {
-        golA = Math.max(1, bandA);
+        golA = bandA;
         golB = Math.max(0, bandA - 1);
       } else {
         golA = Math.max(0, bandB - 1);
-        golB = Math.max(1, bandB);
+        golB = bandB;
       }
     }
   } else {
