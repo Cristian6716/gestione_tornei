@@ -14,7 +14,6 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Carica punteggi esistenti quando si cambia giornata
   function loadExisting(day) {
     setGiornata(day);
     setConfirmDelete(false);
@@ -37,16 +36,13 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
   }
 
   async function handleSave() {
-    // Validazione
     const empty = teams.filter((t) => !punteggi[t] && punteggi[t] !== '0');
     if (empty.length > 0) {
       setMessage({ type: 'error', text: `Punteggi mancanti per: ${empty.join(', ')}` });
       return;
     }
-
     setSaving(true);
     setMessage(null);
-
     try {
       await onSave(giornata, punteggi);
       setMessage({ type: 'success', text: `Giornata ${giornata} salvata con successo!` });
@@ -63,14 +59,11 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
       setMessage({ type: 'warning', text: `Sei sicuro? Clicca di nuovo per cancellare la Giornata ${giornata}` });
       return;
     }
-
     setDeleting(true);
     setMessage(null);
     setConfirmDelete(false);
-
     try {
       await onDelete(giornata);
-      // Svuota il form
       const empty = {};
       teams.forEach((t) => (empty[t] = ''));
       setPunteggi(empty);
@@ -82,35 +75,31 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
     }
   }
 
-  // Giornate disponibili (24-38)
   const giornateRange = Array.from({ length: 15 }, (_, i) => 24 + i);
 
   return (
     <div className="space-y-6">
       {/* Selettore Giornata */}
       <div>
-        <label className="block text-sm text-gray-400 mb-2 font-medium">
-          <i className="far fa-calendar-alt mr-2"></i>Seleziona Giornata
+        <label className="block text-xs text-[#555] mb-2 font-mono uppercase tracking-widest">
+          Seleziona Giornata
         </label>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1 flex-wrap">
           {giornateRange.map((g) => {
             const exists = giornate?.[String(g)];
             return (
               <button
                 key={g}
                 onClick={() => loadExisting(g)}
-                className={`px-3 py-2 rounded-lg text-sm font-bold transition-all ${
+                className={`px-3 py-2 text-xs font-black border cursor-pointer font-mono ${
                   giornata === g
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                    ? 'bg-[#FBBF24] text-black border-[#FBBF24]'
                     : exists
-                    ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-900/50'
-                    : 'bg-slate-800 text-gray-400 hover:bg-slate-700 border border-slate-700'
+                    ? 'bg-black text-[#22C55E] border-[#22C55E] hover:bg-[#22C55E] hover:text-black'
+                    : 'bg-black text-[#555] border-[#333] hover:border-white hover:text-white'
                 }`}
               >
-                {g}
-                {exists && giornata !== g && (
-                  <i className="fas fa-check ml-1 text-xs"></i>
-                )}
+                {g}{exists && giornata !== g && ' ✓'}
               </button>
             );
           })}
@@ -119,18 +108,17 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
 
       {/* Form punteggi */}
       <div>
-        <h3 className="text-sm text-gray-400 mb-3 font-medium">
-          <i className="fas fa-edit mr-2"></i>Punteggi Giornata {giornata}
+        <h3 className="text-xs text-[#555] mb-3 font-mono uppercase tracking-widest">
+          Punteggi Giornata {giornata}
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
           {teams.map((team, idx) => (
             <div
               key={team}
-              className="flex items-center gap-3 bg-slate-800/50 rounded-lg p-3 border border-slate-700/50"
+              className="flex items-center gap-3 bg-[#0a0a0a] p-3 border border-[#222]"
             >
-              <span className="text-xs text-gray-500 w-5 text-right">{idx + 1}.</span>
-              <i className="fas fa-shield-alt text-blue-400 text-sm"></i>
-              <span className="text-sm text-gray-200 flex-1 truncate">{team}</span>
+              <span className="text-xs text-[#444] w-5 text-right font-mono">{idx + 1}.</span>
+              <span className="text-sm text-white flex-1 truncate font-bold">{team}</span>
               <input
                 type="number"
                 step="0.5"
@@ -139,7 +127,7 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
                 value={punteggi[team]}
                 onChange={(e) => handleChange(team, e.target.value)}
                 placeholder="0.0"
-                className="w-20 bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-right font-mono text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-20 bg-black border-2 border-[#333] px-3 py-1.5 text-right font-mono text-sm text-white focus:border-[#FBBF24] focus:outline-none"
               />
             </div>
           ))}
@@ -149,75 +137,51 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
       {/* Messaggi */}
       {message && (
         <div
-          className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+          className={`p-3 text-xs font-mono border uppercase tracking-wide ${
             message.type === 'success'
-              ? 'bg-green-900/30 text-green-400 border border-green-500/30'
+              ? 'border-[#22C55E] text-[#22C55E]'
               : message.type === 'error'
-              ? 'bg-red-900/30 text-red-400 border border-red-500/30'
+              ? 'border-[#DC2626] text-[#DC2626]'
               : message.type === 'warning'
-              ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-500/30'
-              : 'bg-blue-900/30 text-blue-400 border border-blue-500/30'
+              ? 'border-[#FBBF24] text-[#FBBF24]'
+              : 'border-[#3b82f6] text-[#3b82f6]'
           }`}
         >
-          <i
-            className={`fas ${
-              message.type === 'success'
-                ? 'fa-check-circle'
-                : message.type === 'error'
-                ? 'fa-exclamation-circle'
-                : message.type === 'warning'
-                ? 'fa-exclamation-triangle'
-                : 'fa-info-circle'
-            }`}
-          ></i>
           {message.text}
         </div>
       )}
 
-      {/* Bottoni azioni */}
-      <div className="flex gap-3">
+      {/* Azioni */}
+      <div className="flex gap-2">
         <button
           onClick={handleSave}
           disabled={saving || deleting}
-          className={`flex-1 py-3 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 font-black uppercase tracking-widest text-xs border-2 cursor-pointer font-mono ${
             saving || deleting
-              ? 'bg-gray-600 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-lg shadow-blue-500/20'
+              ? 'bg-[#222] text-[#555] border-[#222] cursor-not-allowed'
+              : 'bg-[#FBBF24] text-black border-[#FBBF24] hover:bg-black hover:text-[#FBBF24]'
           }`}
         >
-          {saving ? (
-            <>
-              <i className="fas fa-spinner fa-spin"></i> Salvataggio...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-save"></i> Salva Giornata {giornata}
-            </>
-          )}
+          {saving ? 'Salvataggio...' : `Salva G${giornata}`}
         </button>
 
         {giornate?.[String(giornata)] && (
           <button
             onClick={handleDelete}
             disabled={saving || deleting}
-            className={`py-3 px-5 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 ${
+            className={`py-3 px-5 font-black uppercase tracking-widest text-xs border-2 cursor-pointer font-mono ${
               deleting
-                ? 'bg-gray-600 cursor-not-allowed'
+                ? 'bg-[#222] text-[#555] border-[#222] cursor-not-allowed'
                 : confirmDelete
-                ? 'bg-red-600 hover:bg-red-500 shadow-lg shadow-red-500/30 animate-pulse'
-                : 'bg-red-900/50 hover:bg-red-800 border border-red-500/30 text-red-300'
+                ? 'bg-[#DC2626] text-white border-[#DC2626] hover:bg-black hover:text-[#DC2626]'
+                : 'bg-black text-[#DC2626] border-[#DC2626] hover:bg-[#DC2626] hover:text-white'
             }`}
           >
-            {deleting ? (
-              <i className="fas fa-spinner fa-spin"></i>
-            ) : (
-              <i className="fas fa-trash-alt"></i>
-            )}
+            {deleting ? '...' : confirmDelete ? 'Conferma' : 'DEL'}
           </button>
         )}
       </div>
 
-      {/* Sezione pareggi torneo */}
       <TorneoDraws
         giornata={giornata}
         giornate={giornate}
@@ -229,19 +193,12 @@ export default function AdminPanel({ giornate, onSave, onDelete, torneoMatches, 
   );
 }
 
-/**
- * Sotto-componente che mostra i pareggi del torneo per la giornata selezionata
- * e permette all'admin di scegliere il vincitore manualmente.
- */
 function TorneoDraws({ giornata, giornate, torneoMatches, torneoOverrides, onSaveOverride }) {
   const [savingId, setSavingId] = useState(null);
 
   if (!torneoMatches || !giornate?.[String(giornata)]) return null;
 
-  // Trova i match del torneo per questa giornata che sono in pareggio
-  const drawMatches = torneoMatches.filter((m) => {
-    return m.day === giornata && m.draw === true;
-  });
+  const drawMatches = torneoMatches.filter((m) => m.day === giornata && m.draw === true);
 
   if (drawMatches.length === 0) return null;
 
@@ -256,13 +213,12 @@ function TorneoDraws({ giornata, giornate, torneoMatches, torneoOverrides, onSav
   }
 
   return (
-    <div className="mt-2 p-4 bg-amber-900/10 border border-amber-500/30 rounded-xl">
-      <h3 className="text-sm font-bold text-amber-400 mb-3 flex items-center gap-2">
-        <i className="fas fa-exclamation-triangle"></i>
-        Pareggi nel Torneo - Giornata {giornata}
+    <div className="mt-2 p-4 border-2 border-[#FBBF24]">
+      <h3 className="text-xs font-black text-[#FBBF24] mb-3 font-mono uppercase tracking-widest">
+        ⚠ Pareggi Torneo — Giornata {giornata}
       </h3>
-      <p className="text-xs text-gray-400 mb-4">
-        Le seguenti partite del torneo sono finite in pareggio. Seleziona il vincitore.
+      <p className="text-xs text-[#555] mb-4 font-mono">
+        Partite finite in pareggio. Seleziona il vincitore.
       </p>
 
       <div className="space-y-3">
@@ -274,71 +230,47 @@ function TorneoDraws({ giornata, giornate, torneoMatches, torneoOverrides, onSav
           return (
             <div
               key={match.id}
-              className={`rounded-lg border p-3 ${
-                isResolved
-                  ? 'bg-green-900/10 border-green-500/20'
-                  : 'bg-slate-800/60 border-amber-500/20'
-              }`}
+              className={`border p-3 ${isResolved ? 'border-[#22C55E]' : 'border-[#FBBF24]/40'}`}
             >
-              {/* Info match */}
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono text-gray-500">{match.id}</span>
+                <span className="text-xs font-mono text-[#444]">{match.id}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-amber-400">
-                    {match.golA}-{match.golB}
-                  </span>
+                  <span className="text-xs font-black text-[#FBBF24] font-mono">{match.golA}–{match.golB}</span>
                   {match.label && (
-                    <span className="text-xs bg-purple-900/30 text-purple-400 px-2 py-0.5 rounded-full">
-                      {match.label}
-                    </span>
+                    <span className="text-xs border border-[#555] text-[#555] px-2 py-0.5 font-mono">{match.label}</span>
                   )}
                   {isResolved && (
-                    <span className="text-xs bg-green-900/30 text-green-400 px-2 py-0.5 rounded-full">
-                      <i className="fas fa-check mr-1"></i>Risolto
-                    </span>
+                    <span className="text-xs border border-[#22C55E] text-[#22C55E] px-2 py-0.5 font-mono uppercase">Risolto</span>
                   )}
                 </div>
               </div>
 
-              {/* Punteggi fanta */}
-              <div className="text-xs text-gray-500 mb-2 text-center">
+              <div className="text-xs text-[#444] mb-2 text-center font-mono">
                 {match.scoreA} vs {match.scoreB}
               </div>
 
-              {/* Bottoni selezione vincitore */}
               <div className="flex gap-2">
                 <button
                   onClick={() => handleSelectWinner(match.id, 'A')}
                   disabled={isSaving}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-1 py-2 text-xs font-black border-2 cursor-pointer font-mono uppercase truncate ${
                     currentOverride === 'A'
-                      ? 'bg-green-600 text-white shadow-lg shadow-green-500/30'
-                      : 'bg-slate-700 text-gray-300 hover:bg-slate-600 border border-slate-600'
+                      ? 'bg-[#22C55E] text-black border-[#22C55E]'
+                      : 'bg-black text-white border-[#333] hover:border-white'
                   }`}
                 >
-                  {isSaving ? (
-                    <i className="fas fa-spinner fa-spin"></i>
-                  ) : currentOverride === 'A' ? (
-                    <i className="fas fa-trophy"></i>
-                  ) : null}
-                  <span className="truncate">{match.teamA}</span>
+                  {isSaving ? '...' : match.teamA}
                 </button>
-
                 <button
                   onClick={() => handleSelectWinner(match.id, 'B')}
                   disabled={isSaving}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-1 py-2 text-xs font-black border-2 cursor-pointer font-mono uppercase truncate ${
                     currentOverride === 'B'
-                      ? 'bg-green-600 text-white shadow-lg shadow-green-500/30'
-                      : 'bg-slate-700 text-gray-300 hover:bg-slate-600 border border-slate-600'
+                      ? 'bg-[#22C55E] text-black border-[#22C55E]'
+                      : 'bg-black text-white border-[#333] hover:border-white'
                   }`}
                 >
-                  {isSaving ? (
-                    <i className="fas fa-spinner fa-spin"></i>
-                  ) : currentOverride === 'B' ? (
-                    <i className="fas fa-trophy"></i>
-                  ) : null}
-                  <span className="truncate">{match.teamB}</span>
+                  {isSaving ? '...' : match.teamB}
                 </button>
               </div>
             </div>
